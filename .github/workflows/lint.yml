@@ -1,25 +1,23 @@
-name: Lint
+name: Reviewdog
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     types: [opened, synchronize]
-    paths:
-      - '**.go'
-      - 'go.mod'
+    paths: '**.go'
 
 jobs:
-  golangci:
-    name: lint
+  golangci-lint:
+    name: golangci-lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          go-version-file: go.mod
+          fetch-depth: 0
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: reviewdog/action-golangci-lint@f9bba13753278f6a73b27a56a3ffb1bfda90ed71 # v2.8.0
         with:
-          version: latest
+          github_token: ${{ github.token }}
+          level: warning
+          golangci_lint_flags: "--config=.golangci.yml"
+          reporter: github-pr-review
