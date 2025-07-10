@@ -18,17 +18,22 @@ import (
 //      Name     string     // capturing name, for OpCapture
 // }
 
-func Parse(re string) (*syntax.Regexp, error) {
-	return syntax.Parse(re, syntax.Perl)
+func Parse(re string, flags syntax.Flags) (*syntax.Regexp, error) {
+	return syntax.Parse(re, flags)
 }
-
 func StarHeight(r *syntax.Regexp) int {
 	switch r.Op {
 	case syntax.OpLiteral:
 		return 0
-	case syntax.OpStar, syntax.OpPlus, syntax.OpRepeat:
+	case syntax.OpStar, syntax.OpPlus:
 		cost := StarHeight(r.Sub[0])
 		return cost + 1
+	case syntax.OpRepeat:
+		cost := StarHeight(r.Sub[0])
+		if r.Max < 0 { // unbounded repeat, like `.*`
+			return cost + 1
+		}
+		return cost
 	default:
 		var m int
 		for _, v := range r.Sub {
@@ -53,4 +58,21 @@ func MaxRepeat(r *syntax.Regexp) int {
 		}
 		return m
 	}
+}
+
+func RegexSize(r *syntax.Regexp) int {
+	size := 1 // 演算子ノード自体のコスト
+	
+	// 文字列データのサイズ（キャプチャグループ名）
+	size += len(r.Name)
+	
+	// rune配列のサイズ（1文字1コスト）
+	size += len(r.Rune)
+	
+	// 子ノードのサイズを再帰的に計算
+	for _, sub := range r.Sub {
+		size += RegexSize(sub)
+	}
+	
+	return size
 }
