@@ -21,3 +21,4 @@ jobs:
           level: warning
           golangci_lint_flags: "--config=.golangci.yml"
           reporter: github-pr-review
+          golangci_lint_version: latest
