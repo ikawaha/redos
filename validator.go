@@ -41,15 +41,12 @@ type Complexity struct {
 	MaxRepeat int `json:"max_repeat"`
 	// StarHeight is the maximum height of a star in the regex.
 	StarHeight int `json:"star_height"`
-	// MaxSize is the maximum size of the regex in bytes.
-	MaxSize int `json:"max_size"`
 }
 
 func NewDefaultLimit() *Complexity {
 	return &Complexity{
 		MaxRepeat:  DefaultMaxRepeatLimit,
 		StarHeight: DefaultStarHeightLimit,
-		MaxSize:    DefaultMaxSizeLimit,
 	}
 }
 
@@ -83,41 +80,33 @@ func (v Validator) Complexity(re string) (*Complexity, error) {
 	if re == "" {
 		return &ret, nil
 	}
-	
+
 	// If all limits are negative, we may skip parsing entirely
-	if v.limit.MaxRepeat < 0 && v.limit.StarHeight < 0 && v.limit.MaxSize < 0 {
+	if v.limit.MaxRepeat < 0 && v.limit.StarHeight < 0 {
 		ret.MaxRepeat = -1
 		ret.StarHeight = -1
-		ret.MaxSize = -1
 		return &ret, nil
 	}
-	
+
 	r, err := parser.Parse(re, v.syntax)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse regex: %w", err)
 	}
-	
+
 	// Calculate MaxRepeat only if limit is not negative
 	if v.limit.MaxRepeat < 0 {
 		ret.MaxRepeat = -1
 	} else {
 		ret.MaxRepeat = parser.MaxRepeat(r)
 	}
-	
+
 	// Calculate StarHeight only if limit is not negative
 	if v.limit.StarHeight < 0 {
 		ret.StarHeight = -1
 	} else {
 		ret.StarHeight = parser.StarHeight(r)
 	}
-	
-	// Calculate MaxSize only if limit is not negative
-	if v.limit.MaxSize < 0 {
-		ret.MaxSize = -1
-	} else {
-		ret.MaxSize = parser.RegexSize(r)
-	}
-	
+
 	return &ret, nil
 }
 
@@ -134,10 +123,6 @@ func (v Validator) Validate(re string) error {
 	// Check StarHeight only if limit is not negative
 	if v.limit.StarHeight >= 0 && c.StarHeight > v.limit.StarHeight {
 		errs = errors.Join(errs, fmt.Errorf("regex exceeds star height limit: %d > %d", c.StarHeight, v.limit.StarHeight))
-	}
-	// Check MaxSize only if limit is not negative
-	if v.limit.MaxSize >= 0 && c.MaxSize > v.limit.MaxSize {
-		errs = errors.Join(errs, fmt.Errorf("regex exceeds max size limit: %d > %d", c.MaxSize, v.limit.MaxSize))
 	}
 	return errs
 }

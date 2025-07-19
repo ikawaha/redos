@@ -162,9 +162,15 @@ func TestRealWorldPatterns(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			r, err := Parse(test.pattern, syntax.Perl)
 			if err != nil {
+				if test.hasError {
+					return
+				}
 				t.Fatalf("Failed to parse regex %q: %v", test.pattern, err)
 			}
-
+			if test.hasError {
+				t.Errorf("Expected error for pattern %q but got none", test.pattern)
+				return
+			}
 			starHeight := StarHeight(r)
 			if starHeight != test.starHeight {
 				t.Errorf("StarHeight(%q) = %d; want %d", test.pattern, starHeight, test.starHeight)

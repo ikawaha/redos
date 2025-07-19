@@ -59,20 +59,3 @@ func MaxRepeat(r *syntax.Regexp) int {
 		return m
 	}
 }
-
-func RegexSize(r *syntax.Regexp) int {
-	size := 1 // 演算子ノード自体のコスト
-	
-	// 文字列データのサイズ（キャプチャグループ名）
-	size += len(r.Name)
-	
-	// rune配列のサイズ（1文字1コスト）
-	size += len(r.Rune)
-	
-	// 子ノードのサイズを再帰的に計算
-	for _, sub := range r.Sub {
-		size += RegexSize(sub)
-	}
-	
-	return size
-}

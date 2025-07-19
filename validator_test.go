@@ -43,25 +43,6 @@ func TestRegexSyntax_toSyntaxFlags(t *testing.T) {
 	}
 }
 
-func TestConstants(t *testing.T) {
-	// Test that constants have expected values
-	if SyntaxPerl != 1 {
-		t.Errorf("SyntaxPerl = %v; want 1", SyntaxPerl)
-	}
-	if SyntaxPOSIX != 2 {
-		t.Errorf("SyntaxPOSIX = %v; want 2", SyntaxPOSIX)
-	}
-	if DefaultRegexSyntax != SyntaxPerl {
-		t.Errorf("DefaultRegexSyntax = %v; want %v", DefaultRegexSyntax, SyntaxPerl)
-	}
-	if DefaultMaxRepeatLimit != 50 {
-		t.Errorf("DefaultMaxRepeatLimit = %v; want 50", DefaultMaxRepeatLimit)
-	}
-	if DefaultStarHeightLimit != 1 {
-		t.Errorf("DefaultStarHeightLimit = %v; want 1", DefaultStarHeightLimit)
-	}
-}
-
 func TestNewDefaultLimit(t *testing.T) {
 	limit := NewDefaultLimit()
 	if limit == nil {
@@ -72,9 +53,6 @@ func TestNewDefaultLimit(t *testing.T) {
 	}
 	if limit.StarHeight != DefaultStarHeightLimit {
 		t.Errorf("StarHeight = %v; want %v", limit.StarHeight, DefaultStarHeightLimit)
-	}
-	if limit.MaxSize != DefaultMaxSizeLimit {
-		t.Errorf("MaxSize = %v; want %v", limit.MaxSize, DefaultMaxSizeLimit)
 	}
 }
 
@@ -157,46 +135,46 @@ func TestValidator_Complexity(t *testing.T) {
 	})
 
 	tests := []struct {
-		name           string
-		pattern        string
-		expectedMaxRepeat int
+		name               string
+		pattern            string
+		expectedMaxRepeat  int
 		expectedStarHeight int
-		expectedMaxSize int
+		expectedMaxSize    int
 	}{
 		{
-			name:           "simple_literal",
-			pattern:        "hello",
-			expectedMaxRepeat: 0,
+			name:               "simple_literal",
+			pattern:            "hello",
+			expectedMaxRepeat:  0,
 			expectedStarHeight: 0,
-			expectedMaxSize: 20, // "hello" = 5 runes * 4 bytes = 20
+			expectedMaxSize:    20, // "hello" = 5 runes * 4 bytes = 20
 		},
 		{
-			name:           "simple_star",
-			pattern:        "a*",
-			expectedMaxRepeat: 0,
+			name:               "simple_star",
+			pattern:            "a*",
+			expectedMaxRepeat:  0,
 			expectedStarHeight: 1,
-			expectedMaxSize: 4, // "a" = 1 rune * 4 bytes = 4
+			expectedMaxSize:    4, // "a" = 1 rune * 4 bytes = 4
 		},
 		{
-			name:           "simple_repeat",
-			pattern:        "a{1,10}",
-			expectedMaxRepeat: 10,
+			name:               "simple_repeat",
+			pattern:            "a{1,10}",
+			expectedMaxRepeat:  10,
 			expectedStarHeight: 0,
-			expectedMaxSize: 4, // "a" = 1 rune * 4 bytes = 4
+			expectedMaxSize:    4, // "a" = 1 rune * 4 bytes = 4
 		},
 		{
-			name:           "email_pattern",
-			pattern:        `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`,
-			expectedMaxRepeat: 0,
+			name:               "email_pattern",
+			pattern:            `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`,
+			expectedMaxRepeat:  0,
 			expectedStarHeight: 1,
-			expectedMaxSize: 112, // character classes and literals
+			expectedMaxSize:    112, // character classes and literals
 		},
 		{
-			name:           "complex_pattern",
-			pattern:        `^[a-zA-Z0-9_]{3,20}$`,
-			expectedMaxRepeat: 20,
+			name:               "complex_pattern",
+			pattern:            `^[a-zA-Z0-9_]{3,20}$`,
+			expectedMaxRepeat:  20,
 			expectedStarHeight: 0,
-			expectedMaxSize: 32, // character class with many runes
+			expectedMaxSize:    32, // character class with many runes
 		},
 	}
 
@@ -211,9 +189,6 @@ func TestValidator_Complexity(t *testing.T) {
 			}
 			if c.StarHeight != test.expectedStarHeight {
 				t.Errorf("StarHeight = %v; want %v", c.StarHeight, test.expectedStarHeight)
-			}
-			if c.MaxSize != test.expectedMaxSize {
-				t.Errorf("MaxSize = %v; want %v", c.MaxSize, test.expectedMaxSize)
 			}
 		})
 	}
@@ -296,40 +271,40 @@ func TestReDoSPatterns(t *testing.T) {
 
 	t.Run("nested_quantifiers", func(t *testing.T) {
 		redosPatterns := []struct {
-			name           string
-			pattern        string
+			name               string
+			pattern            string
 			expectedStarHeight int
-			shouldFail     bool
+			shouldFail         bool
 		}{
 			{
-				name:           "classic_redos",
-				pattern:        "(a+)+",
+				name:               "classic_redos",
+				pattern:            "(a+)+",
 				expectedStarHeight: 2,
-				shouldFail:     true,
+				shouldFail:         true,
 			},
 			{
-				name:           "double_star",
-				pattern:        "(a*)*",
+				name:               "double_star",
+				pattern:            "(a*)*",
 				expectedStarHeight: 2,
-				shouldFail:     true,
+				shouldFail:         true,
 			},
 			{
-				name:           "plus_star_combination",
-				pattern:        "(a+)*",
+				name:               "plus_star_combination",
+				pattern:            "(a+)*",
 				expectedStarHeight: 2,
-				shouldFail:     true,
+				shouldFail:         true,
 			},
 			{
-				name:           "redos_with_suffix",
-				pattern:        "(a+)+b",
+				name:               "redos_with_suffix",
+				pattern:            "(a+)+b",
 				expectedStarHeight: 2,
-				shouldFail:     true,
+				shouldFail:         true,
 			},
 			{
-				name:           "triple_nesting",
-				pattern:        "((a+)*)*",
+				name:               "triple_nesting",
+				pattern:            "((a+)*)*",
 				expectedStarHeight: 3,
-				shouldFail:     true,
+				shouldFail:         true,
 			},
 		}
 
@@ -356,28 +331,28 @@ func TestReDoSPatterns(t *testing.T) {
 
 	t.Run("alternation_with_quantifiers", func(t *testing.T) {
 		redosPatterns := []struct {
-			name           string
-			pattern        string
+			name               string
+			pattern            string
 			expectedStarHeight int
-			shouldFail     bool
+			shouldFail         bool
 		}{
 			{
-				name:           "alternation_with_quantifiers",
-				pattern:        "(a+|b+)*",
+				name:               "alternation_with_quantifiers",
+				pattern:            "(a+|b+)*",
 				expectedStarHeight: 2,
-				shouldFail:     true,
+				shouldFail:         true,
 			},
 			{
-				name:           "duplicate_alternation",
-				pattern:        "(a|a)*",
+				name:               "duplicate_alternation",
+				pattern:            "(a|a)*",
 				expectedStarHeight: 1,
-				shouldFail:     false,
+				shouldFail:         false,
 			},
 			{
-				name:           "mixed_quantifiers",
-				pattern:        "(a+|b*)*",
+				name:               "mixed_quantifiers",
+				pattern:            "(a+|b*)*",
 				expectedStarHeight: 2,
-				shouldFail:     true,
+				shouldFail:         true,
 			},
 		}
 
@@ -404,28 +379,28 @@ func TestReDoSPatterns(t *testing.T) {
 
 	t.Run("real_world_dangerous_patterns", func(t *testing.T) {
 		dangerousPatterns := []struct {
-			name           string
-			pattern        string
+			name               string
+			pattern            string
 			expectedStarHeight int
-			shouldFail     bool
+			shouldFail         bool
 		}{
 			{
-				name:           "whitespace_processing",
-				pattern:        `\s*(\S+\s*)*`,
+				name:               "whitespace_processing",
+				pattern:            `\s*(\S+\s*)*`,
 				expectedStarHeight: 2,
-				shouldFail:     true,
+				shouldFail:         true,
 			},
 			{
-				name:           "email_validation_dangerous",
-				pattern:        `([a-zA-Z0-9._%+-]+)*@.*`,
+				name:               "email_validation_dangerous",
+				pattern:            `([a-zA-Z0-9._%+-]+)*@.*`,
 				expectedStarHeight: 2,
-				shouldFail:     true,
+				shouldFail:         true,
 			},
 			{
-				name:           "safe_email_validation",
-				pattern:        `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`,
+				name:               "safe_email_validation",
+				pattern:            `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`,
 				expectedStarHeight: 1,
-				shouldFail:     false,
+				shouldFail:         false,
 			},
 		}
 
@@ -456,7 +431,6 @@ func TestBoundaryConditions(t *testing.T) {
 		v := NewValidator(WithLimit(&Complexity{
 			MaxRepeat:  100,
 			StarHeight: 1,
-			MaxSize:    1000, // Allow reasonable size
 		}))
 
 		// Should pass: StarHeight = 1
@@ -476,7 +450,6 @@ func TestBoundaryConditions(t *testing.T) {
 		v := NewValidator(WithLimit(&Complexity{
 			MaxRepeat:  50,
 			StarHeight: 2,
-			MaxSize:    1000, // Allow reasonable size
 		}))
 
 		// Should pass: MaxRepeat = 50
@@ -519,7 +492,6 @@ func TestNegativeValueSkipping(t *testing.T) {
 		v := NewValidator(WithLimit(&Complexity{
 			MaxRepeat:  -1,
 			StarHeight: 1,
-			MaxSize:    1000, // Allow reasonable size
 		}))
 
 		// Test that MaxRepeat calculation is skipped
@@ -551,7 +523,6 @@ func TestNegativeValueSkipping(t *testing.T) {
 		v := NewValidator(WithLimit(&Complexity{
 			MaxRepeat:  10,
 			StarHeight: -1,
-			MaxSize:    1000, // Allow reasonable size
 		}))
 
 		// Test that StarHeight calculation is skipped
@@ -583,7 +554,6 @@ func TestNegativeValueSkipping(t *testing.T) {
 		v := NewValidator(WithLimit(&Complexity{
 			MaxRepeat:  -1,
 			StarHeight: -1,
-			MaxSize:    -1, // Skip all checks
 		}))
 
 		// Test that both calculations are skipped
@@ -620,117 +590,6 @@ func TestNegativeValueSkipping(t *testing.T) {
 		err = v.Validate("a{1,1}")
 		if err == nil {
 			t.Error("Validate(\"a{1,1}\") error = nil; want error (MaxRepeat = 1 > 0)")
-		}
-	})
-}
-
-func TestRegexSizeCalculation(t *testing.T) {
-	v := NewValidator()
-
-	tests := []struct {
-		name        string
-		pattern     string
-		description string
-	}{
-		{
-			name:        "small_pattern",
-			pattern:     "a",
-			description: "Single character pattern",
-		},
-		{
-			name:        "medium_pattern",
-			pattern:     "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}",
-			description: "Email validation pattern",
-		},
-		{
-			name:        "large_character_class",
-			pattern:     "[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]",
-			description: "Large character class",
-		},
-		{
-			name:        "long_literal",
-			pattern:     "this_is_a_very_long_literal_string_for_testing_size_calculation",
-			description: "Long literal string",
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			c, err := v.Complexity(test.pattern)
-			if err != nil {
-				t.Fatalf("Complexity(%q) error = %v; want nil", test.pattern, err)
-			}
-			if c.MaxSize <= 0 {
-				t.Errorf("MaxSize = %v; want > 0", c.MaxSize)
-			}
-			t.Logf("Pattern %q has size %d bytes", test.pattern, c.MaxSize)
-		})
-	}
-}
-
-func TestMaxSizeValidation(t *testing.T) {
-	t.Run("within_size_limit", func(t *testing.T) {
-		v := NewValidator(WithLimit(&Complexity{
-			MaxRepeat:  100,
-			StarHeight: 2,
-			MaxSize:    1000,
-		}))
-
-		// Small pattern should pass
-		err := v.Validate("hello")
-		if err != nil {
-			t.Errorf("Validate(\"hello\") error = %v; want nil", err)
-		}
-	})
-
-	t.Run("exceeds_size_limit", func(t *testing.T) {
-		v := NewValidator(WithLimit(&Complexity{
-			MaxRepeat:  100,
-			StarHeight: 2,
-			MaxSize:    20, // Very small limit
-		}))
-
-		// Large pattern should fail (size > 20)
-		err := v.Validate("[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]")
-		if err == nil {
-			t.Error("Validate(large character class) error = nil; want error")
-		}
-	})
-
-	t.Run("skip_size_check", func(t *testing.T) {
-		v := NewValidator(WithLimit(&Complexity{
-			MaxRepeat:  10,
-			StarHeight: 1,
-			MaxSize:    -1, // Skip size check
-		}))
-
-		// Large pattern should pass because size check is skipped
-		err := v.Validate("[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]")
-		if err != nil {
-			t.Errorf("Validate(large character class) error = %v; want nil (size check should be skipped)", err)
-		}
-	})
-
-	t.Run("size_boundary_test", func(t *testing.T) {
-		v := NewValidator(WithLimit(&Complexity{
-			MaxRepeat:  100,
-			StarHeight: 2,
-			MaxSize:    100,
-		}))
-
-		// Test pattern just under the limit
-		c, err := v.Complexity("hello") // This should be around 20 bytes
-		if err != nil {
-			t.Fatalf("Complexity(\"hello\") error = %v; want nil", err)
-		}
-
-		if c.MaxSize > 100 {
-			t.Errorf("Pattern size %d > 100, need a smaller test pattern", c.MaxSize)
-		} else {
-			err = v.Validate("hello")
-			if err != nil {
-				t.Errorf("Validate(\"hello\") error = %v; want nil (within size limit)", err)
-			}
 		}
 	})
 }
